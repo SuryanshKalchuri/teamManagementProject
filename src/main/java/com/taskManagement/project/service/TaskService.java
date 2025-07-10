@@ -97,4 +97,51 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found."));
         taskRepo.delete(task);
     }
+
+    public Task updateTask(Long taskId, Task updatedTask, Long assignedToId, Long projectId) {
+        Task existingTask = taskRepo.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found."));
+
+        if (updatedTask.getTitle() != null) {
+            String trimmedTitle = updatedTask.getTitle().trim();
+            if (trimmedTitle.isEmpty()) {
+                throw new IllegalArgumentException("Task title cannot be empty.");
+            }
+            existingTask.setTitle(trimmedTitle);
+        }
+
+        if (updatedTask.getDueDate() != null) {
+            if (updatedTask.getDueDate().isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException("Due date cannot be in the past.");
+            }
+            existingTask.setDueDate(updatedTask.getDueDate());
+        }
+
+        if (updatedTask.getDescription() != null) {
+            existingTask.setDescription(updatedTask.getDescription());
+        }
+
+        if (updatedTask.getStatus() != null) {
+            existingTask.setStatus(updatedTask.getStatus());
+        }
+
+        if (updatedTask.getPriority() != null) {
+            existingTask.setPriority(updatedTask.getPriority());
+        }
+
+        if (assignedToId != null) {
+            User assignedUser = userRepo.findById(assignedToId)
+                    .orElseThrow(() -> new IllegalArgumentException("User with ID " + assignedToId + " not found."));
+            existingTask.setAssignedTo(assignedUser);
+        }
+
+        if (projectId != null) {
+            Projects project = projectRepo.findById(projectId)
+                    .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found."));
+            existingTask.setProject(project);
+        }
+
+        return taskRepo.save(existingTask);
+    }
+
 }
