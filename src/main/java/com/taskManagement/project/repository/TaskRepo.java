@@ -15,32 +15,24 @@ import java.util.List;
 public interface TaskRepo extends JpaRepository<Task, Long> {
     Page<Task> findByAssignedTo(User assignedUser,Task.ETaskStatus status,Pageable pageable);
 
-    // 2. Find tasks by project (with pagination)
     Page<Task> findByProject(Projects project, Pageable pageable);
 
-    // 3. Find tasks by assigned user and status (with pagination)
     Page<Task> findByAssignedToAndStatus(User assignedUser, Task.ETaskStatus status, Pageable pageable);
 
     Page<Task> findByAssignedTo(User user, Pageable pageable);
 
-    // 4. Find tasks by project and status (with pagination)
     Page<Task> findByProjectAndStatus(Projects project, Task.ETaskStatus status, Pageable pageable);
 
-    // 5. Find tasks with due date before or on a specific date (with pagination)
+
     Page<Task> findByDueDateLessThanEqual(LocalDate date, Pageable pageable);
 
-    // 6. Get all tasks with pagination
     public Page<Task> findAll(Pageable pageable);
 
-    // 7. Find tasks by status
-    List<Task> findByStatus(Task.ETaskStatus status);
+    Page<Task> findByStatus(Task.ETaskStatus status, Pageable pageable);
 
-    // 8. Count tasks by status
     long countByStatus(Task.ETaskStatus status);
 
-    // 9. Count tasks due before or on a specific date
     long countByDueDateLessThanEqual(LocalDate date);
 
-    // 10. Find all tasks ordered by creation date (for recent tasks)
     List<Task> findAllByOrderByCreatedAtDesc();
 }

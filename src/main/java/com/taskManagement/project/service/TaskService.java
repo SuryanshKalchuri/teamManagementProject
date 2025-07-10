@@ -7,8 +7,9 @@ import com.taskManagement.project.repository.ProjectRepo;
 import com.taskManagement.project.repository.TaskRepo;
 import com.taskManagement.project.repository.UserRepo;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -53,6 +54,47 @@ public class TaskService {
 
         task.setProject(project);
         return taskRepo.save(task);
+    }
+    public Task getTaskById(Long taskId) {
+        return taskRepo.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found."));
+    }
 
+    public Page<Task> getAllTasks(Pageable pageable) {
+        return taskRepo.findAll(pageable);
+    }
+
+    public Page<Task> getTasksByAssignedUser(Long userId, Pageable pageable) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found."));
+        return taskRepo.findByAssignedTo(user, pageable);
+    }
+
+    public Page<Task> getTasksByProjectAndStatus(Long projectId, Task.ETaskStatus status, Pageable pageable) {
+        Projects project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found."));
+        return taskRepo.findByProjectAndStatus(project, status, pageable);
+    }
+
+    public Page<Task> getTasksByStatus(Task.ETaskStatus status, Pageable pageable) {
+        return taskRepo.findByStatus(status, pageable);
+    }
+
+    public Page<Task> getTasksByProject(Long projectId, Pageable pageable) {
+        Projects project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found."));
+        return taskRepo.findByProject(project, pageable);
+    }
+
+    public Page<Task> getTasksByAssignedUserAndStatus(Long userId, Task.ETaskStatus status, Pageable pageable) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found."));
+        return taskRepo.findByAssignedToAndStatus(user, status, pageable);
+    }
+
+    public void deleteTask(Long taskId) {
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task with ID " + taskId + " not found."));
+        taskRepo.delete(task);
     }
 }
