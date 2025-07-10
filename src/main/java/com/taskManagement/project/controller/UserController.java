@@ -1,13 +1,12 @@
 package com.taskManagement.project.controller;
 
 import com.taskManagement.project.model.User;
-import com.taskManagement.project.service.UserService;
 import com.taskManagement.project.repository.UserRepo;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.taskManagement.project.service.UserService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -18,64 +17,50 @@ import java.util.*;
 //})
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserController {
-
     private final UserRepo userRepo;
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(
-            @RequestParam String username,
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam(required = false) Set<String> roles
-    ) {
-        User newUser = userService.registerUser(username, email, password, roles);
-        return ResponseEntity.status(201).body(newUser);
-    }
-
     @GetMapping
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+    public ResponseEntity<List<User>> getAllUser(){
+        List<User> users = userRepo.findAll();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userRepo.findById(id)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<User> getUserById(@PathVariable Long id){
+        Optional<User> user = userService.findUserById(id);
+        return user.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody User updatedUser) {
-        return userRepo.findById(id).map(existingUser -> {
-            existingUser.setUsername(updatedUser.getUsername());
-            existingUser.setEmail(updatedUser.getEmail());
+    @PutMapping("/{id}/roles")
+    @PreAuthorize("hasRole('PROJECT_MANAGER')")
+    public ResponseEntity<?> updateUserRoles(@PathVariable Long id, @RequestBody Map<String, Set<String>> rolesMap){
+        Set<String> roleNames = rolesMap.get("roles");
+        if (roleNames == null || roleNames.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: field is required.");
+        }
 
-            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-                existingUser.setPassword(updatedUser.getPassword());
-            }
-
-            if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
-                existingUser.setRoles(updatedUser.getRoles());
-            }
-
-            return ResponseEntity.ok(userRepo.save(existingUser));
-        }).orElse(ResponseEntity.notFound().build());
+        try {
+            User updatedUser = userService.updateUserRoles(id, roleNames);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userRepo.existsById(id)) {
-            userRepo.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+    @PreAuthorize("hasRole('PROJECT_MANAGER')")
+    public ResponseEntity<?> deleteUseer(@PathVariable Long id){
+        Optional<User> userOptional = userService.findUserById(id);
 
-    @GetMapping("/page")
-    public Page<User> getUsers(Pageable pageable) {
-        return userRepo.findAll(pageable);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with ID " + id + " not found.");
+        }
+
+        userService.deleteUser(id);
+        return ResponseEntity.ok("User with ID " + id + " has been deleted successfully.");
     }
 }

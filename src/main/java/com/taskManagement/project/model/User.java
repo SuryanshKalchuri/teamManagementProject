@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import com.taskManagement.project.model.Roles;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -17,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class User {
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

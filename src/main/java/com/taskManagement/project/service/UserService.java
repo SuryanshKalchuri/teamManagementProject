@@ -18,7 +18,7 @@ import java.util.Set;
 public class UserService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
 
     public User registerUser(String username, String email,String password, Set<String> strRoles){
         if (userRepo.existsByUsername(username)) {
@@ -32,7 +32,7 @@ public class UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+        //user.setPassword(passwordEncoder.encode(password));
 
         Set<Roles> roles = new HashSet<>();
 

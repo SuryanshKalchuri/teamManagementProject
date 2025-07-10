@@ -44,7 +44,7 @@ public class Task {
     private ETaskPriority priority = ETaskPriority.MEDIUM;
 
     @Column(name = "due_date", updatable = false)
-    private LocalDateTime due_date;
+    private LocalDateTime dueDate;
 
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
@@ -53,9 +53,9 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_id", nullable = false)
-    private User assigned_to_id;
+    private User assignedTo;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 }

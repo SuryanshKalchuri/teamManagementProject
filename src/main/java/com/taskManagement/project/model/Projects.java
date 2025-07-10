@@ -24,16 +24,16 @@ public class Projects {
     private String description;
 
     @Column(name = "start_date", updatable = false)
-    private LocalDateTime start_date;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date", updatable = false)
-    private LocalDateTime end_date;
+    private LocalDateTime endDate;
 
     @ManyToOne
     @JoinColumn(name = "project_manager_id", nullable = false)
-    private User project_manager;
+    private User projectManager;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 }

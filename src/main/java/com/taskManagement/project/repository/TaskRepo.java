@@ -6,10 +6,12 @@ import com.taskManagement.project.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public interface TaskRepo extends JpaRepository<Task, Long> {
     Page<Task> findByAssignedTo(User assignedUser,Task.ETaskStatus status,Pageable pageable);
 
@@ -18,6 +20,8 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
 
     // 3. Find tasks by assigned user and status (with pagination)
     Page<Task> findByAssignedToAndStatus(User assignedUser, Task.ETaskStatus status, Pageable pageable);
+
+    Page<Task> findByAssignedTo(User user, Pageable pageable);
 
     // 4. Find tasks by project and status (with pagination)
     Page<Task> findByProjectAndStatus(Projects project, Task.ETaskStatus status, Pageable pageable);
