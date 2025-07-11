@@ -6,21 +6,42 @@ import com.taskManagement.project.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-//@CrossOrigin(origins = {
-//        "http://localhost:8080",
-//        "http://127.0.0.1:5500"
-//})
+@CrossOrigin(origins = {
+        "http://localhost:8080",
+        "http://127.0.0.1:5500"
+})
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
 public class UserController {
     private final UserRepo userRepo;
     private final UserService userService;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody Map<String, Object> request) {
+        try {
+            System.out.println(request);
+            String username = (String) request.get("username");
+            String email = (String) request.get("email");
+            String password = (String) request.get("password");
+            List<String> rolesList = (List<String>) request.get("roles");
+
+            Set<String> roles = new HashSet<>();
+            if (rolesList != null) {
+                roles.addAll(rolesList);
+            }
+
+            User user = userService.registerUser(username, email, password, roles);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUser(){
@@ -36,7 +57,6 @@ public class UserController {
     }
 
     @PutMapping("/{id}/roles")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
     public ResponseEntity<?> updateUserRoles(@PathVariable Long id, @RequestBody Map<String, Set<String>> rolesMap){
         Set<String> roleNames = rolesMap.get("roles");
         if (roleNames == null || roleNames.isEmpty()) {
@@ -52,8 +72,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('PROJECT_MANAGER')")
-    public ResponseEntity<?> deleteUseer(@PathVariable Long id){
+    public ResponseEntity<?> deleteUser(@PathVariable Long id){
         Optional<User> userOptional = userService.findUserById(id);
 
         if (userOptional.isEmpty()) {

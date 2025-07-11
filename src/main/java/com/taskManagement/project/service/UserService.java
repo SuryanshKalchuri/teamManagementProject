@@ -5,7 +5,7 @@ import com.taskManagement.project.model.User;
 import com.taskManagement.project.repository.RoleRepo;
 import com.taskManagement.project.repository.UserRepo;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -32,7 +32,7 @@ public class UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        //user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(password);
 
         Set<Roles> roles = new HashSet<>();
 
